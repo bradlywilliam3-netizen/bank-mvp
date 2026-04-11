@@ -41,37 +41,34 @@ router.post('/register', async (req, res) => {
 // ✅ LOGIN
 router.post('/login', async (req, res) => {
   try {
-   console.log("FULL BODY:", req.body);
-
-const { email, password } = req.body;
-
-console.log("EMAIL:", email);
-console.log("PASSWORD:", password);
-
+    const { email, password } = req.body;
     const cleanEmail = email.trim().toLowerCase();
 
-const user = await User.findOne({ email: cleanEmail });
+    const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
-      console.log("User not found");
       return res.status(400).json({ message: "User not found" });
     }
 
-   if (password !== user.password) {
-  return res.status(400).json({ message: "Invalid password" });
-}
-    console.log("Password match:", valid);
+    // Use bcrypt to compare the plain text password with the hashed one in DB
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!valid) {
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    const token = jwt.sign({ id: user._id }, 'secret');
+    // Use your environment variable for the secret
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret');
 
     res.json({
       message: "Login successful",
       token,
-      user
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        accountNumber: user.accountNumber
+      }
     });
 
   } catch (err) {
@@ -79,5 +76,3 @@ const user = await User.findOne({ email: cleanEmail });
     res.status(500).json({ message: "Server error" });
   }
 });
-
-module.exports = router;
