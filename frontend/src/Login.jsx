@@ -11,10 +11,10 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("https://bank-mvp.onrender.com/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post("https://YOUR-BACKEND.onrender.com/api/auth/login", {
+  email,
+  password,
+});
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
