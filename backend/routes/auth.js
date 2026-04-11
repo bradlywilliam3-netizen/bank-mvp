@@ -41,9 +41,12 @@ router.post('/register', async (req, res) => {
 // ✅ LOGIN
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+   console.log("FULL BODY:", req.body);
 
-    console.log("LOGIN INPUT:", email, password);
+const { email, password } = req.body;
+
+console.log("EMAIL:", email);
+console.log("PASSWORD:", password);
 
     const cleanEmail = email.trim().toLowerCase();
 
