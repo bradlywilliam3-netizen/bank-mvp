@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // ✅ Link moved to correct location
 import bankLogo from "./assets/bank-logo.png";
 
 export default function Login() {
@@ -12,9 +12,9 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       const res = await axios.post("https://bank-mvp.onrender.com/api/auth/login", {
-  email,
-  password,
-});
+        email,
+        password,
+      });
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
@@ -71,12 +71,11 @@ export default function Login() {
         Log in
       </button>
 
-import { Link } from "react-router-dom";
+      {/* ✅ Registration Link */}
+      <p style={styles.registerText}>
+        Don't have an account? <Link to="/register" style={styles.link}>Register here</Link>
+      </p>
 
-// Inside your return block, under the button:
-<p>
-  Don't have an account? <Link to="/register">Register here</Link>
-</p>
       {/* Secondary Button */}
       <button style={styles.secondaryButton}>
         Log in with branch, account and PIN
@@ -98,10 +97,10 @@ const styles = {
     marginBottom: "30px",
   },
   logo: {
-  width: "80px",
-  height: "80px",
-  objectFit: "contain",
-},
+    width: "80px",
+    height: "80px",
+    objectFit: "contain",
+  },
   inputBox: {
     background: "#f5f5f5",
     borderRadius: "12px",
@@ -142,6 +141,16 @@ const styles = {
     background: "#ddd",
     marginBottom: "15px",
     cursor: "pointer",
+  },
+  registerText: {
+    textAlign: "center",
+    marginBottom: "15px",
+    fontSize: "14px",
+  },
+  link: {
+    color: "#1a73e8",
+    textDecoration: "none",
+    fontWeight: "bold",
   },
   secondaryButton: {
     width: "100%",
