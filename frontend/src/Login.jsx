@@ -71,6 +71,12 @@ export default function Login() {
         Log in
       </button>
 
+import { Link } from "react-router-dom";
+
+// Inside your return block, under the button:
+<p>
+  Don't have an account? <Link to="/register">Register here</Link>
+</p>
       {/* Secondary Button */}
       <button style={styles.secondaryButton}>
         Log in with branch, account and PIN

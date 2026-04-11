@@ -3,7 +3,7 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Register from "./Register";
 
-// A simple helper to check if the user is logged in
+// This component protects your dashboard from logged-out users
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -20,7 +20,7 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected Route - Only accessible if logged in */}
+        {/* Protected Route */}
         <Route 
           path="/dashboard" 
           element={
@@ -30,7 +30,7 @@ export default function App() {
           } 
         />
 
-        {/* Catch-all: redirect any unknown pages to login */}
+        {/* Redirect any other address back to Login */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
