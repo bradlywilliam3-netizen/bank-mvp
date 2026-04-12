@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom"; // Commented out for standalone use
 import {
   Mail,
   User,
@@ -14,15 +14,15 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const navigate = useNavigate(); // Commented out for standalone use
+    const user = JSON.parse(localStorage.getItem("user")) || { name: "Guest" }; // Provide a default user for standalone use
   const [currentDate, setCurrentDate] = useState("");
 
   useEffect(() => {
-    if (!user) {
-      navigate("/");
-      return;
-    }
+    // if (!user) {
+    //   // navigate("/"); // Commented out for standalone use
+    //   return;
+    // }
 
     // Format date exactly like the DB app: 12. APR. 2026
     const now = new Date();
@@ -30,9 +30,9 @@ export default function Dashboard() {
     const month = now.toLocaleDateString("de-DE", { month: "short" }).toUpperCase();
     const year = now.getFullYear();
     setCurrentDate(`${day}. ${month}. ${year}`);
-  }, [user, navigate]);
+  }, [user]); // Removed navigate from dependency array for standalone use
 
-  if (!user) return null;
+  // if (!user) return null; // Commented out for standalone use
 
   return (
     <div className="max-w-sm mx-auto h-screen flex flex-col bg-white font-sans overflow-hidden">
@@ -181,10 +181,6 @@ export default function Dashboard() {
 
 // Internal components to keep code clean
 
-/**
- * ActionButton Component
- * Renders circular action buttons with icons and labels
- */
 const ActionButton = ({ icon, label }) => (
   <div className="flex flex-col items-center gap-2 cursor-pointer group">
     <div className="w-16 h-16 rounded-full border border-white/30 flex items-center justify-center transition-all duration-200 hover:bg-white/10 hover:border-white/50 group-hover:shadow-lg">
@@ -196,10 +192,6 @@ const ActionButton = ({ icon, label }) => (
   </div>
 );
 
-/**
- * AccountItem Component
- * Displays account information with balance
- */
 const AccountItem = ({ title, iban, balance }) => (
   <div className="flex items-center justify-between py-5 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 px-2 rounded transition-colors">
     <div className="flex items-center gap-4">
@@ -217,10 +209,6 @@ const AccountItem = ({ title, iban, balance }) => (
   </div>
 );
 
-/**
- * Transaction Component
- * Displays individual transaction with amount and status
- */
 const Transaction = ({ title, amount, negative, icon }) => (
   <div className="flex items-center justify-between py-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 px-2 rounded transition-colors">
     <div className="flex items-center gap-3">
@@ -245,10 +233,6 @@ const Transaction = ({ title, amount, negative, icon }) => (
   </div>
 );
 
-/**
- * NavItem Component
- * Bottom navigation item with icon, label, and active state
- */
 const NavItem = ({ icon, label, active }) => (
   <div className="flex flex-col items-center flex-1 cursor-pointer py-2 group">
     <div
