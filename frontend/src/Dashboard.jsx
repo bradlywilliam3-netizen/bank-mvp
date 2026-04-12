@@ -1,197 +1,170 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [transactions, setTransactions] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
+  const [currentDate, setCurrentDate] = useState("");
 
-  // Theme Colors from the design image
+  // Deutsche Bank Brand Colors
   const theme = {
-    darkBlue: '#2A269B',
-    lightCyan: '#00F0C8',
-    gaugeBg: '#3A37A8',
+    deepBlueGradient: 'linear-gradient(180deg, #001E62 0%, #003DA5 100%)',
+    actionCircle: 'rgba(255, 255, 255, 0.1)',
     textWhite: '#FFFFFF',
-    textMain: '#2E2D77',
-    textSecondary: '#A0A0BF',
-    positiveGreen: '#23C06F',
-    negativeRed: '#F9397C',
-    borderLight: '#F0F0F5',
+    textBlack: '#000000',
+    textGray: '#666666',
+    borderLight: '#E5E5E5',
+    dbBlue: '#001E62'
   };
 
   useEffect(() => {
-    // Security Check: Redirect if not logged in
     if (!user) {
       navigate("/");
       return;
     }
 
-    // Connect to your production Render API
-    axios
-      .get(`https://bank-mvp.onrender.com/api/transactions/${user.email}`)
-      .then((res) => setTransactions(res.data))
-      .catch((err) => console.error("Fetch error:", err));
+    // Auto-updating Date
+    const updateDate = () => {
+      const now = new Date();
+      const options = { day: '2. punct', month: 'SHORT', year: 'numeric' };
+      // Format: 12. APR. 2026
+      const formatted = now.toLocaleDateString('de-DE', { day: '2-digit' }) + ". " + 
+                        now.toLocaleDateString('de-DE', { month: 'short' }).toUpperCase() + ". " + 
+                        now.getFullYear();
+      setCurrentDate(formatted);
+    };
+
+    updateDate();
   }, [user, navigate]);
 
   if (!user) return null;
 
   return (
     <div style={styles.appContainer}>
-      {/* --- TOP SECTION (Dark Blue) --- */}
-      <div style={{ ...styles.topSection, backgroundColor: theme.darkBlue }}>
-        <div style={styles.header}>
-          <span style={{ color: theme.textWhite, fontWeight: 'bold' }}>Übersicht</span>
-        </div>
+      {/* --- TOP NAV ICONS --- */}
+      <div style={styles.topIcons}>
+        <div style={styles.iconWrapper}>✉️<div style={styles.notificationDot} /></div>
+        <div style={styles.iconWrapper}>👤</div>
+      </div>
 
-        {/* Days Until Salary Row */}
-        <div style={styles.statRow}>
-          <div style={styles.circularStat}>
-            <svg width="36" height="36">
-              <circle cx="18" cy="18" r="16" fill="none" stroke={theme.gaugeBg} strokeWidth="3" />
-              <circle cx="18" cy="18" r="16" fill="none" stroke={theme.lightCyan} strokeWidth="3" 
-                strokeDasharray="75 100" strokeLinecap="round" transform="rotate(-90 18 18)" />
-              <text x="18" y="23" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">23</text>
-            </svg>
-            <span style={{ color: theme.textWhite, fontSize: '13px' }}>Tage bis zum Gehalt</span>
+      {/* --- BLUE TOP SECTION (Deutsche Bank Circle) --- */}
+      <div style={{ ...styles.topSection, background: theme.deepBlueGradient }}>
+        
+        {/* Main Balance Circle */}
+        <div style={styles.balanceCircleContainer}>
+          <div style={styles.dottedCircle}>
+             <span style={styles.currencyLabel}>EUR</span>
+             <h1 style={styles.mainBalance}>191.519,01</h1>
+             <div style={styles.dateDisplay}>{currentDate}</div>
           </div>
-          <button style={styles.statButton}>Zur Statistik ›</button>
         </div>
 
-        {/* Main Balance Gauge */}
-        <div style={styles.gaugeContainer}>
-          <svg width="200" height="100" viewBox="0 0 200 100">
-            <path d="M 20 90 A 80 80 0 0 1 180 90" fill="none" stroke={theme.gaugeBg} strokeWidth="10" strokeLinecap="round" />
-            <path d="M 20 90 A 80 80 0 0 1 140 30" fill="none" stroke={theme.lightCyan} strokeWidth="10" strokeLinecap="round" />
-            <text x="100" y="75" textAnchor="middle" fill="white" fontSize="28" fontWeight="bold">
-                {user.balance?.toLocaleString('de-DE') || "375"} €
-            </text>
-            <text x="100" y="95" textAnchor="middle" fill="white" fontSize="10" opacity="0.7">vom Gehalt verfügbar</text>
-          </svg>
+        {/* Quick Actions */}
+        <div style={styles.actionRow}>
+          <ActionButton icon="€→" label="Überweisen" />
+          <ActionButton icon="|||" label="Bargeld-Code" />
+          <ActionButton icon="€↻" label="Geplant" />
         </div>
       </div>
 
-      {/* --- BODY SECTION (White) --- */}
+      {/* --- ACCOUNTS SECTION --- */}
       <div style={styles.bodySection}>
-        <h3 style={{ color: theme.textMain, fontSize: '18px', marginBottom: '20px' }}>Tägliche Konten</h3>
+        <h3 style={styles.sectionHeader}>Konten</h3>
 
-        {/* Dynamic User Account */}
-        <AccountRow 
-          icon="🏦" 
-          title="Persönliches Girokonto" 
-          sub={user.accountNumber || "0443897400"}
-          balance={user.balance?.toLocaleString('de-DE') || "2.371,22"} 
-          color={theme.positiveGreen} 
+        {/* BestKonto (Your Specific Details) */}
+        <AccountItem 
+          title="BestKonto" 
+          iban="DE85 8107 0024 0218 0081 00" 
+          balance="191.519,01" 
         />
 
-        {/* Transaction History Section */}
-        <h3 style={{ color: theme.textMain, fontSize: '18px', marginTop: '30px', marginBottom: '15px' }}>Transactions</h3>
-        
-        {transactions.length > 0 ? (
-          transactions.map((tx) => (
-            <AccountRow 
-              key={tx._id}
-              icon="🔄" 
-              title={tx.receiver === user.email ? "Zahlung erhalten" : "Überweisung"} 
-              sub={tx.receiver === user.email ? `Von: ${tx.sender}` : `An: ${tx.receiver}`}
-              balance={`${tx.receiver === user.email ? "+" : "-"}${tx.amount.toLocaleString('de-DE')}`} 
-              color={tx.receiver === user.email ? theme.positiveGreen : theme.negativeRed} 
-            />
-          ))
-        ) : (
-          <p style={{ color: theme.textSecondary, fontSize: '14px' }}>Keine aktuellen Buchungen.</p>
-        )}
+        <AccountItem 
+          title="maxblue Depotkonto" 
+          iban="DE58 **** 0081 01" 
+          balance="4,92" 
+        />
       </div>
 
       {/* --- BOTTOM NAVIGATION --- */}
       <div style={styles.bottomNav}>
-        <NavItem icon="📊" label="Übersicht" active color={theme.darkBlue} />
-        <NavItem icon="📂" label="Verträge" color={theme.textSecondary} />
-        <NavItem icon="💡" label="Tipps" color={theme.textSecondary} />
-        <NavItem icon="•••" label="Mehr" color={theme.textSecondary} />
+        <NavItem icon="🟦" label="Übersicht" active />
+        <NavItem icon="€⇄" label="Überweisen" />
+        <NavItem icon="📈" label="Investieren" />
+        <NavItem icon="👜" label="Produkte" />
+        <NavItem icon="☰" label="Services" />
       </div>
     </div>
   );
 }
 
-// Sub-component for clean Account Rows
-const AccountRow = ({ icon, title, sub, balance, color }) => (
-  <div style={styles.accountRow}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <div style={styles.iconCircle}>{icon}</div>
-      <div>
-        <div style={styles.rowTitle}>{title}</div>
-        {sub && <div style={styles.rowSub}>{sub}</div>}
-      </div>
-    </div>
-    <div style={{ ...styles.rowBalance, color }}>{balance} €</div>
+// Sub-components for cleaner code
+const ActionButton = ({ icon, label }) => (
+  <div style={styles.actionItem}>
+    <div style={styles.actionCircle}>{icon}</div>
+    <span style={styles.actionLabel}>{label}</span>
   </div>
 );
 
-// Sub-component for Bottom Nav Items
-const NavItem = ({ icon, label, active, color }) => (
-  <div style={{ textAlign: 'center', cursor: 'pointer', flex: 1 }}>
-    <div style={{ fontSize: '20px', color }}>{icon}</div>
-    <div style={{ fontSize: '10px', color, fontWeight: active ? 'bold' : 'normal' }}>{label}</div>
+const AccountItem = ({ title, iban, balance }) => (
+  <div style={styles.accountRow}>
+    <div style={styles.accountIconBox}>💶</div>
+    <div style={{ flex: 1 }}>
+      <div style={styles.accountTitle}>{title}</div>
+      <div style={styles.accountIban}>{iban}</div>
+    </div>
+    <div style={styles.accountBalance}>{balance} €</div>
+  </div>
+);
+
+const NavItem = ({ icon, label, active }) => (
+  <div style={{ ...styles.navItem, color: active ? '#003DA5' : '#666' }}>
+    <div style={{ fontSize: '20px' }}>{icon}</div>
+    <div style={{ fontSize: '10px', marginTop: '4px' }}>{label}</div>
+    {active && <div style={styles.activeIndicator} />}
   </div>
 );
 
 const styles = {
   appContainer: {
-    maxWidth: '375px',
-    margin: '0 auto',
-    height: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    maxWidth: '375px', margin: '0 auto', height: '100vh', display: 'flex', flexDirection: 'column',
+    backgroundColor: '#fff', fontFamily: 'Arial, sans-serif', overflow: 'hidden'
+  },
+  topIcons: {
+    position: 'absolute', top: '15px', right: '15px', display: 'flex', gap: '20px', zIndex: 10, color: 'white'
+  },
+  notificationDot: {
+    width: '8px', height: '8px', backgroundColor: 'red', borderRadius: '50%', position: 'absolute', top: 0, right: 0
   },
   topSection: {
-    padding: '20px 20px 40px 20px',
-    borderBottomLeftRadius: '30px',
-    borderBottomRightRadius: '30px',
+    padding: '60px 20px 30px 20px', textAlign: 'center', borderBottomLeftRadius: '30px', borderBottomRightRadius: '30px'
   },
-  header: { textAlign: 'center', marginBottom: '15px' },
-  statRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  circularStat: { display: 'flex', alignItems: 'center', gap: '10px' },
-  statButton: {
-    background: 'rgba(255,255,255,0.15)',
-    border: 'none',
-    color: '#00F0C8',
-    padding: '6px 12px',
-    borderRadius: '20px',
-    fontSize: '11px',
-    fontWeight: 'bold',
-    cursor: 'pointer'
+  balanceCircleContainer: {
+    display: 'flex', justifyContent: 'center', marginBottom: '30px'
   },
-  gaugeContainer: { display: 'flex', justifyContent: 'center', marginTop: '20px' },
-  bodySection: { flex: 1, padding: '25px 20px', overflowY: 'auto' },
-  accountRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '15px 0',
-    borderBottom: '1px solid #F0F0F5'
+  dottedCircle: {
+    width: '200px', height: '200px', borderRadius: '50%', border: '2px dashed rgba(255,255,255,0.4)',
+    display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white'
   },
-  iconCircle: {
-    width: '35px',
-    height: '35px',
-    borderRadius: '8px',
-    backgroundColor: '#F5F5F9',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
+  mainBalance: { fontSize: '28px', margin: '10px 0', fontWeight: 'bold' },
+  currencyLabel: { fontSize: '14px', opacity: 0.8 },
+  dateDisplay: { fontSize: '12px', borderBottom: '1px dotted white', paddingBottom: '2px' },
+  actionRow: { display: 'flex', justifyContent: 'space-around', marginTop: '20px' },
+  actionItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'white' },
+  actionCircle: {
+    width: '50px', height: '50px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.3)',
+    display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px', fontSize: '18px'
   },
-  rowTitle: { fontSize: '14px', fontWeight: '600', color: '#2E2D77' },
-  rowSub: { fontSize: '11px', color: '#A0A0BF', marginTop: '2px' },
-  rowBalance: { fontSize: '15px', fontWeight: 'bold' },
+  actionLabel: { fontSize: '12px' },
+  bodySection: { flex: 1, padding: '20px', overflowY: 'auto' },
+  sectionHeader: { fontSize: '22px', fontWeight: 'bold', marginBottom: '20px' },
+  accountRow: { display: 'flex', alignItems: 'center', padding: '15px 0', borderBottom: '1px solid #eee' },
+  accountIconBox: { width: '40px', fontSize: '20px' },
+  accountTitle: { fontWeight: 'bold', fontSize: '15px' },
+  accountIban: { fontSize: '12px', color: '#666' },
+  accountBalance: { fontWeight: 'bold', fontSize: '15px' },
   bottomNav: {
-    height: '70px',
-    display: 'flex',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTop: '1px solid #F0F0F5',
-    paddingBottom: '10px',
-    backgroundColor: '#fff'
-  }
+    height: '75px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', borderTop: '1px solid #eee', paddingBottom: '15px'
+  },
+  navItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative' },
+  activeIndicator: { height: '3px', width: '20px', backgroundColor: '#003DA5', position: 'absolute', bottom: '-10px' }
 };
