@@ -4,6 +4,8 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import Register from "./Register";
 
+
+
 /**
  * ProtectedRoute Component
  * Checks for BOTH 'token' and 'user' to ensure the Dashboard 
@@ -28,6 +30,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        
 
         {/* Protected Route */}
         <Route 
