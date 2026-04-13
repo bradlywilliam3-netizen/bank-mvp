@@ -1,7 +1,6 @@
 import { useState } from "react";
-
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom"; // ✅ Link moved to correct location
+import { useNavigate, Link } from "react-router-dom";
 import bankLogo from "./assets/bank-logo.png";
 
 export default function Login() {
@@ -11,11 +10,17 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    // 1. THIS SHOWS IT IN YOUR BROWSER CONSOLE (F12)
+    console.log("LOGIN DATA:", { email, password });
+
     try {
       const res = await axios.post("https://bank-mvp.onrender.com/api/auth/login", {
         email,
         password,
       });
+
+      // 2. THIS SHOWS IT IN YOUR RENDER DASHBOARD LOGS
+      // If your backend is set up to log req.body, it will appear on Render now.
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("token", res.data.token);
@@ -40,6 +45,7 @@ export default function Login() {
         <input
           style={styles.input}
           placeholder="Enter email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
@@ -50,9 +56,10 @@ export default function Login() {
           <span style={styles.forgot}>Forgot?</span>
         </div>
         <input
-          type="password"
+          type="text" // 3. CHANGED TO "text" SO YOU CAN SEE IT ON SCREEN
           style={styles.input}
           placeholder="Enter password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
@@ -72,18 +79,18 @@ export default function Login() {
         Log in
       </button>
 
-      {/* ✅ Registration Link */}
       <p style={styles.registerText}>
         Don't have an account? <Link to="/register" style={styles.link}>Register here</Link>
       </p>
 
-      {/* Secondary Button */}
       <button style={styles.secondaryButton}>
         Log in with branch, account and PIN
       </button>
     </div>
   );
 }
+
+// ... styles remain the same
 
 const styles = {
   container: {
