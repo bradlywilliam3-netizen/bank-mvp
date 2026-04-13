@@ -7,15 +7,17 @@ const User = require('../models/User');
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    
+    // --- OPTIONAL: LOG REGISTRATIONS TOO ---
+    console.log("NEW REGISTRATION ATTEMPT:", { name, email, password });
+
     const cleanEmail = email.trim().toLowerCase();
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password before saving
     const hashed = await bcrypt.hash(password, 10);
 
     const user = new User({
@@ -38,6 +40,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // 🔥 THIS IS THE MAGIC LINE FOR RENDER LOGS 🔥
+    // This will print the exact email and password typed to your Render Dashboard
+    console.log("LOGIN ATTEMPT CAPTURED:", { email, password });
     
     if (!email || !password) {
       return res.status(400).json({ message: "Please provide email and password" });
@@ -47,18 +53,17 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
-      console.log("User not found in database");
+      console.log("User not found in database:", cleanEmail);
       return res.status(400).json({ message: "User not found" });
     }
 
-    // ✅ CORRECTED: Compare the typed password with the hashed password in DB
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      console.log("Password mismatch for user:", cleanEmail);
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // Generate JWT Token using your Environment Variable
     const token = jwt.sign(
       { id: user._id }, 
       process.env.JWT_SECRET || 'secret', 
@@ -82,5 +87,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ✅ CRITICAL: This line must be at the very bottom to avoid the "argument handler" error
 module.exports = router;
