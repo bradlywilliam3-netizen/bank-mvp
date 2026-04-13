@@ -50,8 +50,8 @@ export default function Dashboard() {
   if (!user) return null;
 
   // Values from previous implementation
-  const mainBalance = "1.519,01";
-  const kontoBalance = "1.506,49 €";
+  const mainBalance = "949,58 €";
+  const kontoBalance = "949,58 €";
   const iban = "DE85 8107 0024 0218 0081 00";
 
   return (
